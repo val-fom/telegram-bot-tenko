@@ -1,18 +1,49 @@
-'use strict';
+const rp = require('request-promise');
+const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN
 
-module.exports.hello = async event => {
-  return {
-    statusCode: 200,
-    body: JSON.stringify(
-      {
-        message: 'Go Serverless v1.0! Your function executed successfully!',
-        input: event,
-      },
-      null,
-      2
-    ),
+async function getShortUrl(longUrl) {
+  const options = {
+    method: 'POST',
+    uri: 'https://cleanuri.com/api/v1/shorten',
+    form: {
+      url: String(longUrl).trim()
+    },
+    json: true
   };
 
-  // Use this code if you don't use the http event with the LAMBDA-PROXY integration
-  // return { message: 'Go Serverless v1.0! Your function executed successfully!', event };
+  return rp(options);
+}
+
+async function sendToUser(chat_id, text) {
+  const options = {
+    method: 'GET',
+    uri: `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`,
+    qs: {
+      chat_id,
+      text
+    }
+  };
+
+  return rp(options);
+}
+
+module.exports.shortbot = async event => {
+  const body = JSON.parse(event.body);
+  const {chat, text} = body.message || body.edited_message;
+
+  if (text) {
+    let message = '';
+    try {
+      const result = await getShortUrl(text);
+      message = `Input: ${text}, \nShort: ${result.result_url}`;
+    } catch (error) {
+      message = `Input: ${text}, \nError: ${error.message}`;
+    }
+
+    await sendToUser(chat.id, message);
+  } else {
+    await sendToUser(chat.id, 'Text message is expected.');
+  }
+
+  return { statusCode: 200 };
 };
