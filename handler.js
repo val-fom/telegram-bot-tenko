@@ -57,3 +57,19 @@ module.exports.tenkobot = async event => {
 
   return { statusCode: 200 };
 };
+
+module.exports.totalStat = async event => {
+  console.log('Received event:', JSON.stringify(event, null, 2));
+
+  let message = '';
+  try {
+    const result = await getTotalState();
+    message = JSON.stringify(result, null, 2);
+  } catch (error) {
+    message = `Error: ${error.message}`;
+  }
+
+  await sendToUser('274830547', message);
+
+  return { statusCode: 200 };
+};
