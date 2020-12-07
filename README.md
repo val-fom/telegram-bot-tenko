@@ -1,4 +1,4 @@
-### Simple telegram bot using serverless framework
+### Simple telegram bot for Tenko boiler api
 
 _inspired by article [Building Your First Serverless Telegram Bot with AWS Lambda](https://iamondemand.com/blog/building-your-first-serverless-telegram-bot/)_
 
@@ -13,7 +13,7 @@ _inspired by article [Building Your First Serverless Telegram Bot with AWS Lambd
    - `TENKO_API_TOKEN=<authorization token form />api/v1/auth method>`
    - `USER_NAME=<your telegram user name>` - in case you want your bot chat with you only
 7. deploy the bot `serverless deploy`
-8. copy endpoint from the output `https://***************.execute-api.eu-central-1.amazonaws.com/dev/short-bot`
+8. copy endpoint from the output `https://***************.execute-api.eu-central-1.amazonaws.com/dev/tenko-bot`
 9. set the webhook `curl --request POST --url https://api.telegram.org/bot<TELEGRAM_TOKEN>/setWebhook --header 'content-type: application/json' --data '{"url": "<LINK_YOU_GET_FROM_SERVERLESS_DEPLOY>"}'`
 
 ### current functionality
