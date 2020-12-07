@@ -1,4 +1,4 @@
-service: telegram-bot-serverless
+service: telegram-bot-tenko
 
 frameworkVersion: "2"
 useDotenv: true
@@ -9,12 +9,14 @@ provider:
   region: eu-central-1
   environment:
     TELEGRAM_TOKEN: ${env:TELEGRAM_TOKEN}
+    TENKO_API_URI: ${env:TENKO_API_URI}
+    TENKO_API_TOKEN: ${env:TENKO_API_TOKEN}
 
 functions:
-  shortbot:
-    handler: handler.shortbot
+  tenkobot:
+    handler: handler.tenkobot
     events:
       - http:
-          path: short-bot
+          path: tenko-bot
           method: post
           cors: true

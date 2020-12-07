@@ -1,14 +1,17 @@
 const rp = require('request-promise');
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN
+const TENKO_API_URI = process.env.TENKO_API_URI
+const TENKO_API_TOKEN = process.env.TENKO_API_TOKEN
 
-async function getShortUrl(longUrl) {
+async function getTotalState() {
   const options = {
-    method: 'POST',
-    uri: 'https://cleanuri.com/api/v1/shorten',
-    form: {
-      url: String(longUrl).trim()
+    method: 'GET',
+    uri: `${TENKO_API_URI}/total_state`,
+    headers: {
+      "accept": "application/json",
+      "authorization": `Bearer ${TENKO_API_TOKEN}`
     },
-    json: true
+    json: true,
   };
 
   return rp(options);
@@ -27,22 +30,24 @@ async function sendToUser(chat_id, text) {
   return rp(options);
 }
 
-module.exports.shortbot = async event => {
+module.exports.tenkobot = async event => {
   const body = JSON.parse(event.body);
   const {chat, text} = body.message || body.edited_message;
 
-  if (text) {
+  if (text === '/total_state') {
     let message = '';
     try {
-      const result = await getShortUrl(text);
-      message = `Input: ${text}, \nShort: ${result.result_url}`;
+      const result = await getTotalState();
+      console.log('result: ', result);
+      message = JSON.stringify(result, null, 2);
+      console.log('message: ', message);
     } catch (error) {
       message = `Input: ${text}, \nError: ${error.message}`;
     }
 
     await sendToUser(chat.id, message);
   } else {
-    await sendToUser(chat.id, 'Text message is expected.');
+    await sendToUser(chat.id, 'Unknown command');
   }
 
   return { statusCode: 200 };
