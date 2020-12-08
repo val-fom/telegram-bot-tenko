@@ -58,6 +58,9 @@ module.exports.tenkobot = async event => {
   return { statusCode: 200 };
 };
 
+const AWS = require('aws-sdk');
+const lambda = new AWS.Lambda({region: 'eu-central-1'});
+
 // TODO: refactor: move to separate file
 module.exports.totalStat = async event => {
   console.log('Received event:', JSON.stringify(event, null, 2));
@@ -66,6 +69,12 @@ module.exports.totalStat = async event => {
   try {
     const result = await getTotalState();
     message = JSON.stringify(result, null, 2);
+    lambda.invoke({
+      FunctionName: "telegram-bot-tenko-dev-writeStat", 
+      Payload: JSON.stringify({
+        body: result,
+      }), 
+    }).promise();
   } catch (error) {
     message = `Error: ${error.message}`;
   }
@@ -76,13 +85,10 @@ module.exports.totalStat = async event => {
 };
 
 // TODO: refactor: move to separate file
-
-const AWS = require('aws-sdk');
 const ddb = new AWS.DynamoDB.DocumentClient({region: 'eu-central-1'});
 
 module.exports.writeStat = async (event, context, callback) => {
   const requestId = context.awsRequestId;
-  console.log(event.body)
   const {BDT} = event.body;
   const date = getDate(BDT);
 
