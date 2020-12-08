@@ -58,6 +58,7 @@ module.exports.tenkobot = async event => {
   return { statusCode: 200 };
 };
 
+// TODO: refactor: move to separate file
 module.exports.totalStat = async event => {
   console.log('Received event:', JSON.stringify(event, null, 2));
 
@@ -73,3 +74,61 @@ module.exports.totalStat = async event => {
 
   return { statusCode: 200 };
 };
+
+// TODO: refactor: move to separate file
+
+const AWS = require('aws-sdk');
+const ddb = new AWS.DynamoDB.DocumentClient({region: 'eu-central-1'});
+
+module.exports.writeStat = async (event, context, callback) => {
+  const requestId = context.awsRequestId;
+  console.log(event.body)
+  const {BDT} = event.body;
+  const date = getDate(BDT);
+
+  try {
+    await createStatRecord(requestId, date, JSON.stringify(event.body))
+    callback(null, {
+      statusCode: 201,
+      body: '',
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      }
+    })
+  } catch (error) {
+    console.error('error: ', error);
+    callback({
+      statusCode: 500,
+      body: error,
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      }
+    })
+  }
+};
+
+/**
+ * 
+ * @param {string} id 
+ * @param {number} date 
+ * @param {string} data 
+ */
+
+function createStatRecord(id, date, data) {
+  const params = {
+    TableName: 'TenkoStat',
+    Item: {
+      id,
+      date,
+      data,
+    },
+  };
+
+  return ddb.put(params).promise();
+}
+
+function getDate({h, m, dd, mm, yy }) {
+  const date = new Date(`${mm} ${dd} ${yy} ${h}:${m} GMT+0200`);
+  return Number(date);
+}
+
