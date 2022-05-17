@@ -1,6 +1,6 @@
 service: telegram-bot-tenko
 
-frameworkVersion: "2"
+frameworkVersion: '2'
 useDotenv: true
 
 provider:
